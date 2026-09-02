@@ -1,0 +1,234 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" width="100%" height="100%" style="background:#0F1117; font-family:'Inter', system-ui, -apple-system, sans-serif;">
+  <defs>
+    <linearGradient id="indigoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B49DF" />
+      <stop offset="100%" stop-color="#232E99" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#6B7280" />
+    </marker>
+    <marker id="arrow-indigo" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#6366F1" />
+    </marker>
+    <marker id="arrow-emerald" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#10B981" />
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#F59E0B" />
+    </marker>
+  </defs>
+
+  <!-- Title & Subtitle -->
+  <text x="40" y="42" fill="#F3F4F6" font-size="18" font-weight="700" letter-spacing="-0.02em">Razorpay AI Revenue Recovery Agent ? System Architecture</text>
+  <text x="40" y="64" fill="#9CA3AF" font-size="12">Autonomous post-checkout revenue recovery with strict separation of probabilistic LLM reasoning and deterministic policy restraint.</text>
+
+  <!-- 1. Ingestion Layer -->
+  <g transform="translate(40, 100)" filter="url(#shadow)">
+    <rect width="180" height="470" rx="8" fill="#181B22" stroke="#2D333F" stroke-width="1.5"/>
+    <rect x="0" y="0" width="180" height="36" rx="8" fill="#222631"/>
+    <text x="16" y="23" fill="#E5E7EB" font-size="12" font-weight="600">1. Ingestion &amp; Context</text>
+    
+    <g transform="translate(14, 52)">
+      <rect width="152" height="60" rx="6" fill="#111318" stroke="#2D333F"/>
+      <text x="12" y="24" fill="#F3F4F6" font-size="11" font-weight="600">Failed Checkout Event</text>
+      <text x="12" y="42" fill="#9CA3AF" font-size="9" font-family="'JetBrains Mono', monospace">amount, code, method</text>
+    </g>
+
+    <g transform="translate(14, 126)">
+      <rect width="152" height="74" rx="6" fill="#111318" stroke="#2D333F"/>
+      <text x="12" y="22" fill="#F3F4F6" font-size="11" font-weight="600">Customer Agent View</text>
+      <text x="12" y="40" fill="#9CA3AF" font-size="9">Payment history, city,</text>
+      <text x="12" y="54" fill="#9CA3AF" font-size="9">avg days to pay, risk flag</text>
+    </g>
+
+    <!-- Boundary Callout -->
+    <g transform="translate(14, 214)">
+      <rect width="152" height="110" rx="6" fill="#1A1513" stroke="#7C2D12" stroke-dasharray="3 3"/>
+      <text x="10" y="20" fill="#F87171" font-size="10" font-weight="700">?? ISOLATION GUARD</text>
+      <text x="10" y="38" fill="#D1D5DB" font-size="9" font-family="'JetBrains Mono', monospace">propensity_profile</text>
+      <text x="10" y="54" fill="#9CA3AF" font-size="8.5">Simulator ground truth.</text>
+      <text x="10" y="68" fill="#9CA3AF" font-size="8.5">Agent code &amp; LLM</text>
+      <text x="10" y="82" fill="#EF4444" font-size="8.5" font-weight="600">NEVER read this field.</text>
+      <text x="10" y="98" fill="#6B7280" font-size="8">Zero data leakage.</text>
+    </g>
+
+    <g transform="translate(14, 338)">
+      <rect width="152" height="114" rx="6" fill="#111318" stroke="#2D333F"/>
+      <text x="12" y="20" fill="#E5E7EB" font-size="10" font-weight="600">Synthetic Indian Dataset</text>
+      <text x="12" y="36" fill="#9CA3AF" font-size="8.5">N=80 transactions</text>
+      <text x="12" y="52" fill="#9CA3AF" font-size="8.5">Seed-locked (Seed 42)</text>
+      <text x="12" y="68" fill="#9CA3AF" font-size="8.5">5 Failure archetypes</text>
+      <text x="12" y="84" fill="#9CA3AF" font-size="8.5">Realistic RZP error codes</text>
+      <text x="12" y="100" fill="#9CA3AF" font-size="8.5">Train / Held-out split</text>
+    </g>
+  </g>
+
+  <!-- Flow 1 -> 2 Arrow -->
+  <line x1="220" y1="210" x2="260" y2="210" stroke="#6366F1" stroke-width="2" marker-end="url(#arrow-indigo)"/>
+
+  <!-- 2. LLM Reasoning Layer -->
+  <g transform="translate(260, 100)" filter="url(#shadow)">
+    <rect width="200" height="470" rx="8" fill="#181B22" stroke="#3B49DF" stroke-width="1.5"/>
+    <rect x="0" y="0" width="200" height="36" rx="8" fill="url(#indigoGrad)"/>
+    <text x="16" y="23" fill="#FFFFFF" font-size="12" font-weight="600">2. LLM Intent Layer</text>
+
+    <g transform="translate(14, 52)">
+      <rect width="172" height="170" rx="6" fill="#111318" stroke="#2D333F"/>
+      <text x="12" y="22" fill="#818CF8" font-size="11" font-weight="700">Root Cause Classifier</text>
+      <text x="12" y="40" fill="#9CA3AF" font-size="9.5">? technical_failure</text>
+      <text x="12" y="56" fill="#9CA3AF" font-size="9.5">? insufficient_funds</text>
+      <text x="12" y="72" fill="#9CA3AF" font-size="9.5">? authentication_drop</text>
+      <text x="12" y="88" fill="#9CA3AF" font-size="9.5">? intent_hesitation</text>
+      <text x="12" y="104" fill="#9CA3AF" font-size="9.5">? do_not_pursue</text>
+      <line x1="12" y1="116" x2="160" y2="116" stroke="#2D333F"/>
+      <text x="12" y="132" fill="#E5E7EB" font-size="9" font-family="'JetBrains Mono', monospace">confidence: 0.0 - 1.0</text>
+      <text x="12" y="148" fill="#E5E7EB" font-size="9" font-family="'JetBrains Mono', monospace">reasoning: Plain English</text>
+    </g>
+
+    <!-- Graceful Fallback Box -->
+    <g transform="translate(14, 234)">
+      <rect width="172" height="100" rx="6" fill="#1C1826" stroke="#6366F1" stroke-dasharray="2 2"/>
+      <text x="10" y="20" fill="#A78BFA" font-size="10" font-weight="700">? RESILIENT FALLBACK</text>
+      <text x="10" y="38" fill="#D1D5DB" font-size="9">If LLM API times out or</text>
+      <text x="10" y="52" fill="#D1D5DB" font-size="9">returns malformed JSON:</text>
+      <text x="10" y="70" fill="#10B981" font-size="9" font-weight="600">Deterministic classifier</text>
+      <text x="10" y="86" fill="#10B981" font-size="9" font-weight="600">takes over. Zero crashes.</text>
+    </g>
+
+    <g transform="translate(14, 346)">
+      <rect width="172" height="106" rx="6" fill="#111318" stroke="#2D333F"/>
+      <text x="12" y="20" fill="#818CF8" font-size="11" font-weight="700">Empathetic Copy Drafter</text>
+      <text x="12" y="36" fill="#9CA3AF" font-size="9">? Context-aware Hinglish</text>
+      <text x="12" y="50" fill="#9CA3AF" font-size="9">? Strict &lt; 200 chars</text>
+      <text x="12" y="64" fill="#9CA3AF" font-size="9">? {payment_link} holder</text>
+      <text x="12" y="78" fill="#9CA3AF" font-size="9">? Zero urgency manipulation</text>
+      <text x="12" y="94" fill="#10B981" font-size="9" font-weight="600">? "Reply STOP to opt out"</text>
+    </g>
+  </g>
+
+  <!-- Flow 2 -> 3 Arrow -->
+  <line x1="460" y1="210" x2="500" y2="210" stroke="#6366F1" stroke-width="2" marker-end="url(#arrow-indigo)"/>
+
+  <!-- 3. Deterministic Policy Engine -->
+  <g transform="translate(500, 100)" filter="url(#shadow)">
+    <rect width="230" height="470" rx="8" fill="#181B22" stroke="#D97706" stroke-width="1.5"/>
+    <rect x="0" y="0" width="230" height="36" rx="8" fill="url(#amberGrad)"/>
+    <text x="16" y="23" fill="#FFFFFF" font-size="12" font-weight="600">3. Deterministic Policy Engine</text>
+
+    <g transform="translate(14, 48)">
+      <text x="0" y="12" fill="#F59E0B" font-size="9.5" font-weight="700" letter-spacing="0.05em">7 SEQUENTIAL HARD GATES (NO LLM)</text>
+
+      <!-- Gates List -->
+      <g transform="translate(0, 20)">
+        <rect width="202" height="34" rx="4" fill="#111318" stroke="#2D333F"/>
+        <text x="8" y="16" fill="#F3F4F6" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="600">G1 do_not_contact</text>
+        <text x="8" y="28" fill="#9CA3AF" font-size="8.5">Risk flagged or opted out -> SUPPRESS</text>
+      </g>
+
+      <g transform="translate(0, 60)">
+        <rect width="202" height="34" rx="4" fill="#111318" stroke="#2D333F"/>
+        <text x="8" y="16" fill="#F3F4F6" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="600">G2 value_floor</text>
+        <text x="8" y="28" fill="#9CA3AF" font-size="8.5">Amount &lt; Rs. 100 threshold -> SUPPRESS</text>
+      </g>
+
+      <g transform="translate(0, 100)">
+        <rect width="202" height="34" rx="4" fill="#111318" stroke="#2D333F"/>
+        <text x="8" y="16" fill="#F3F4F6" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="600">G3 max_attempts</text>
+        <text x="8" y="28" fill="#9CA3AF" font-size="8.5">Attempts &gt;= 2 -> SUPPRESS (Fatigue cap)</text>
+      </g>
+
+      <g transform="translate(0, 140)">
+        <rect width="202" height="34" rx="4" fill="#111318" stroke="#2D333F"/>
+        <text x="8" y="16" fill="#F3F4F6" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="600">G4 cooldown</text>
+        <text x="8" y="28" fill="#9CA3AF" font-size="8.5">Last attempt &lt; 24h ago -> WAIT</text>
+      </g>
+
+      <g transform="translate(0, 180)">
+        <rect width="202" height="34" rx="4" fill="#111318" stroke="#2D333F"/>
+        <text x="8" y="16" fill="#F3F4F6" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="600">G5 quiet_hours</text>
+        <text x="8" y="28" fill="#9CA3AF" font-size="8.5">Outside 09:00-20:00 IST -> WAIT</text>
+      </g>
+
+      <g transform="translate(0, 220)">
+        <rect width="202" height="34" rx="4" fill="#111318" stroke="#2D333F"/>
+        <text x="8" y="16" fill="#F3F4F6" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="600">G6 confidence_floor</text>
+        <text x="8" y="28" fill="#9CA3AF" font-size="8.5">Confidence &lt; 0.55 -> ESCALATE TO HUMAN</text>
+      </g>
+
+      <g transform="translate(0, 260)">
+        <rect width="202" height="34" rx="4" fill="#111318" stroke="#2D333F"/>
+        <text x="8" y="16" fill="#F3F4F6" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="600">G7 category_routing</text>
+        <text x="8" y="28" fill="#9CA3AF" font-size="8.5">Intent-specific action &amp; channel mapping</text>
+      </g>
+
+      <!-- What-If Simulation Box -->
+      <g transform="translate(0, 304)">
+        <rect width="202" height="98" rx="6" fill="#191510" stroke="#F59E0B" stroke-dasharray="2 2"/>
+        <text x="8" y="18" fill="#FBBF24" font-size="9.5" font-weight="700">??? WHAT-IF SIMULATION</text>
+        <text x="8" y="34" fill="#D1D5DB" font-size="8.5">Sliders for G2 floor, G3 attempts,</text>
+        <text x="8" y="48" fill="#D1D5DB" font-size="8.5">&amp; G6 confidence. Re-evaluates</text>
+        <text x="8" y="62" fill="#D1D5DB" font-size="8.5">completed run in &lt;10ms without</text>
+        <text x="8" y="76" fill="#10B981" font-size="8.5" font-weight="600">re-calling LLM API endpoints.</text>
+        <text x="8" y="90" fill="#9CA3AF" font-size="8">Turns restraint into a quantity.</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Flow 3 -> 4 Arrow -->
+  <line x1="730" y1="210" x2="770" y2="210" stroke="#10B981" stroke-width="2" marker-end="url(#arrow-emerald)"/>
+
+  <!-- 4. Execution & Audit Layer -->
+  <g transform="translate(770, 100)" filter="url(#shadow)">
+    <rect width="190" height="470" rx="8" fill="#181B22" stroke="#059669" stroke-width="1.5"/>
+    <rect x="0" y="0" width="190" height="36" rx="8" fill="url(#emeraldGrad)"/>
+    <text x="16" y="23" fill="#FFFFFF" font-size="12" font-weight="600">4. Execution &amp; Ledger</text>
+
+    <g transform="translate(14, 52)">
+      <rect width="162" height="90" rx="6" fill="#111318" stroke="#2D333F"/>
+      <text x="10" y="20" fill="#34D399" font-size="10.5" font-weight="700">Razorpay Test Mode API</text>
+      <text x="10" y="36" fill="#9CA3AF" font-size="8.5">? Real 1-click payment links</text>
+      <text x="10" y="50" fill="#9CA3AF" font-size="8.5">? https://rzp.io/i/...</text>
+      <text x="10" y="64" fill="#9CA3AF" font-size="8.5">? Idempotency guarded</text>
+      <text x="10" y="78" fill="#9CA3AF" font-size="8.5">? Structured API error catch</text>
+    </g>
+
+    <g transform="translate(14, 152)">
+      <rect width="162" height="90" rx="6" fill="#111318" stroke="#2D333F"/>
+      <text x="10" y="20" fill="#34D399" font-size="10.5" font-weight="700">Simulator Engine</text>
+      <text x="10" y="36" fill="#9CA3AF" font-size="8.5">? Probabilistic customer</text>
+      <text x="10" y="50" fill="#9CA3AF" font-size="8.5">? Multiplicative modifiers</text>
+      <text x="10" y="64" fill="#9CA3AF" font-size="8.5">? Attempt &amp; amount decay</text>
+      <text x="10" y="78" fill="#9CA3AF" font-size="8.5">? 100% Seed-deterministic</text>
+    </g>
+
+    <g transform="translate(14, 252)">
+      <rect width="162" height="100" rx="6" fill="#111318" stroke="#2D333F"/>
+      <text x="10" y="20" fill="#34D399" font-size="10.5" font-weight="700">Live SSE &amp; UI Dashboard</text>
+      <text x="10" y="36" fill="#9CA3AF" font-size="8.5">? Live decision feed</text>
+      <text x="10" y="50" fill="#9CA3AF" font-size="8.5">? Tamper-evident drawer</text>
+      <text x="10" y="64" fill="#9CA3AF" font-size="8.5">? Phone message preview</text>
+      <text x="10" y="78" fill="#9CA3AF" font-size="8.5">? 1-click CSV audit export</text>
+      <text x="10" y="92" fill="#9CA3AF" font-size="8.5">? Uplift comparison modal</text>
+    </g>
+
+    <g transform="translate(14, 362)">
+      <rect width="162" height="90" rx="6" fill="#111318" stroke="#2D333F"/>
+      <text x="10" y="20" fill="#34D399" font-size="10.5" font-weight="700">Immutable Audit Trail</text>
+      <text x="10" y="36" fill="#9CA3AF" font-size="8.5">? SHA-256 state hashes</text>
+      <text x="10" y="50" fill="#9CA3AF" font-size="8.5">? Every gate pass/fail log</text>
+      <text x="10" y="64" fill="#9CA3AF" font-size="8.5">? Downloadable CSV</text>
+      <text x="10" y="78" fill="#9CA3AF" font-size="8.5">? Zero propensity leakage</text>
+    </g>
+  </g>
+</svg>
