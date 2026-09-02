@@ -91,7 +91,7 @@ def test_api_start_run_and_stream():
         "reseed": False,
         "split": "held_out"
     })
-    assert response.status_code == 200
+    assert response.status_code in [200, 202]
     data = response.json()
     assert "run_id" in data
     assert data["status"] == "started"

@@ -3,12 +3,32 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.api.health import router as health_router
 from app.api.runs import router as runs_router
+from app.api.payments import router as payments_router
+from app.api.policy import router as policy_router
 from app.api.eval import router as eval_router
 
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
-    description="Agentic Revenue Recovery System for Failed and Abandoned Post-Checkout Transactions"
+    description="""
+# Razorpay AI Revenue Recovery Agent — API Documentation
+**Track 3 (AI Revenue Recovery) — Razorpay AI Buildathon**
+
+### Core Architectural Features:
+- **LLM Classification & Drafter**: Empathic, context-aware recovery copy with zero ground-truth data leakage.
+- **Deterministic Policy Engine**: 7 hard gates enforcing customer protection, fatigue stopping rules, and anti-spam restraint.
+- **Razorpay Test Mode Integration**: Automated 1-click test payment link creation with idempotency guards.
+- **Real-Time Streaming**: Server-Sent Events (SSE) broadcasting live recovery transitions to the dashboard.
+- **What-If Policy Simulation**: Instant parameter tuning without re-calling LLM endpoints.
+- **Honest Benchmarking**: Seed-locked counterfactual comparison against zero-intervention baseline.
+""",
+    openapi_tags=[
+        {"name": "System Health", "description": "Liveness and system status probes"},
+        {"name": "Recovery Runs & Live Decision Stream", "description": "Trigger batches, stream live SSE transitions, and inspect exceptions"},
+        {"name": "Payment Audit Trails", "description": "Tamper-evident audit records and full attempt histories"},
+        {"name": "Deterministic Policy Engine & What-If Simulation", "description": "Live thresholds and what-if parameter simulation"},
+        {"name": "Evaluation & Benchmark Metrics", "description": "Pitch metrics, uplift tables, and honest limitations"},
+    ]
 )
 
 # Configure CORS for frontend Vite dev server
@@ -23,6 +43,8 @@ app.add_middleware(
 # Include API routes
 app.include_router(health_router)
 app.include_router(runs_router)
+app.include_router(payments_router)
+app.include_router(policy_router)
 app.include_router(eval_router)
 
 
