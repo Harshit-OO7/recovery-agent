@@ -43,7 +43,7 @@ export const PolicyConfigPanel: React.FC<PolicyConfigPanelProps> = ({
   const [maxAttempts, setMaxAttempts] = useState<number>(2);
   const [confidenceFloor, setConfidenceFloor] = useState<number>(0.55);
 
-  const cooldownRealHours = policyConfig?.POLICY_CONFIG.COOLDOWN_HOURS || 24;
+  const cooldownRealHours = policyConfig?.POLICY_CONFIG?.COOLDOWN_HOURS ?? 24;
   const cooldownCompressedSecs = (cooldownRealHours * 3600 / timeMultiplier).toFixed(1);
 
   const handleParamChange = (newFloor: number, newAttempts: number, newConf: number) => {

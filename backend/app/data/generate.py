@@ -125,12 +125,19 @@ RETAIL_CARTS = [
 def generate_dataset(seed: int = 42, wipe_db: bool = True) -> Tuple[List[Customer], List[FailedPayment]]:
     rng = random.Random(seed)
 
-    if wipe_db:
-        Base.metadata.drop_all(bind=engine)
-        Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
 
     db = SessionLocal()
     try:
+        if wipe_db:
+            from app.models.audit_log import AuditLog
+            from app.models.recovery_attempt import RecoveryAttempt
+            db.query(AuditLog).delete()
+            db.query(RecoveryAttempt).delete()
+            db.query(FailedPayment).delete()
+            db.query(Customer).delete()
+            db.commit()
+
         num_customers = 55
         customers: List[Customer] = []
         risk_flag_indices = set(rng.sample(range(num_customers), 7))
