@@ -33,7 +33,7 @@ class FailedPayment(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     # Relationships
-    customer = relationship("Customer", back_populates="failed_payments")
+    customer = relationship("Customer", back_populates="failed_payments", lazy="joined")
     recovery_attempts = relationship("RecoveryAttempt", back_populates="failed_payment", cascade="all, delete-orphan", order_by="RecoveryAttempt.attempt_number")
     audit_logs = relationship("AuditLog", back_populates="failed_payment", cascade="all, delete-orphan", order_by="AuditLog.created_at")
 

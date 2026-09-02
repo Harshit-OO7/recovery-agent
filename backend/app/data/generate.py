@@ -213,11 +213,13 @@ def generate_dataset(seed: int = 42, wipe_db: bool = True) -> Tuple[List[Custome
         micro_indices = set(rng.sample(range(total_payments), 10))
         train_indices = set(rng.sample(range(total_payments), 60))
 
+        customer_map = {c.id: c for c in customers}
         failed_payments: List[FailedPayment] = []
         base_time = datetime.now(timezone.utc) - timedelta(hours=48)
 
         for i in range(total_payments):
             cust_id = payment_customer_assignment[i]
+            cust_obj = customer_map[cust_id]
             scenario = all_scenarios[i]
             code, reason, allowed_methods, _ = scenario
             method = rng.choice(allowed_methods)
@@ -236,6 +238,7 @@ def generate_dataset(seed: int = 42, wipe_db: bool = True) -> Tuple[List[Custome
                 id=f"pay_{2000 + i}",
                 razorpay_order_id=f"order_{seed}_{100000 + i}",
                 customer_id=cust_id,
+                customer=cust_obj,
                 amount_paise=amount_paise,
                 currency="INR",
                 method=method,
