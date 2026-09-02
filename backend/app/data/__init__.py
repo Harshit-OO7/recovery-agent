@@ -1,4 +1,7 @@
 """
-Synthetic dataset generation module.
-Generates realistic payment failure events (OTP timeouts, insufficient funds, intentional abandonment, gateway network errors).
+Synthetic dataset generation package.
 """
+
+from app.data.generate import generate_dataset, print_summary_table
+
+__all__ = ["generate_dataset", "print_summary_table"]
