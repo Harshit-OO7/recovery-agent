@@ -27,7 +27,10 @@ export const PhoneMessagePreview: React.FC<PhoneMessagePreviewProps> = ({
   // Generate authentic Hinglish-compliant copy matching app/llm/drafter.py
   const firstName = customerName.split(' ')[0];
   const formattedAmt = formatRupees(amountRupees);
-  const linkUrl = paymentLinkUrl || 'https://rzp.io/i/test_sample_link';
+  const rawUrl = paymentLinkUrl || 'http://localhost:8000/pay/test_sample_link';
+  const linkUrl = rawUrl.startsWith('https://rzp.io/i/test_') || rawUrl.startsWith('https://rzp.io/i/mock_')
+    ? `http://localhost:8000/pay/${rawUrl.split('/').pop()}`
+    : rawUrl;
 
   let messageBody = '';
   if (category === 'technical_failure') {
