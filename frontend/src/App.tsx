@@ -1,10 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
+import { Download, Layers, Moon, Sun } from 'lucide-react';
 import { Badge } from '@/components/primitives/Badge';
+import { Button } from '@/components/primitives/Button';
 import { PolicyConfigPanel } from '@/components/dashboard/PolicyConfigPanel';
 import { DecisionFeed } from '@/components/dashboard/DecisionFeed';
 import { MetricsPanel } from '@/components/dashboard/MetricsPanel';
 import { ExceptionsTable } from '@/components/dashboard/ExceptionsTable';
 import { AuditDrawer } from '@/components/dashboard/AuditDrawer';
+import { ComparisonModal } from '@/components/dashboard/ComparisonModal';
 import { 
   fetchPolicyConfig, 
   startRecoveryRun, 
@@ -21,18 +24,23 @@ import {
 } from '@/api/types';
 
 export default function App() {
-  // State
+  // Theme state
+  const [isDark, setIsDark] = useState<boolean>(false);
+
+  // Core Data State
   const [policyConfig, setPolicyConfig] = useState<PolicyConfig | null>(null);
   const [comparisonReport, setComparisonReport] = useState<ComparisonReport | null>(null);
   const [exceptions, setExceptions] = useState<ExceptionsResponse | null>(null);
   const [simulationData, setSimulationData] = useState<SimulatePolicyResponse | null>(null);
   const [events, setEvents] = useState<SSEEventData[]>([]);
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
+  const [isComparisonOpen, setIsComparisonOpen] = useState<boolean>(false);
 
   // Run Controls
   const [mode, setMode] = useState<'agent' | 'baseline'>('agent');
   const [seed, setSeed] = useState<number>(42);
   const [timeMultiplier, setTimeMultiplier] = useState<number>(28800);
+  const [injectFailure, setInjectFailure] = useState<boolean>(false);
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
 
@@ -58,6 +66,15 @@ export default function App() {
       .then((report) => setComparisonReport(report))
       .catch((err) => console.error('Error loading initial comparison:', err));
   }, []);
+
+  // Sync dark class on root
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
 
   // Clean up EventSource on unmount
   useEffect(() => {
@@ -95,6 +112,7 @@ export default function App() {
         split: 'all',
         reseed: true,
         time_multiplier: timeMultiplier,
+        inject_llm_failure: injectFailure,
       });
 
       setCurrentRunId(res.run_id);
@@ -177,14 +195,13 @@ export default function App() {
             console.error('Run encountered error:', data);
           }
         } catch (parseErr) {
-          // Heartbeat or malformed frame
+          // Heartbeat
         }
       };
 
       es.onerror = () => {
         es.close();
         setIsRunning(false);
-        // On stream close, refresh comparison
         fetchComparisonReport(seed).then((rep) => setComparisonReport(rep));
       };
 
@@ -211,20 +228,34 @@ export default function App() {
     }
   };
 
-  // 4. What-If Parameter Simulation Slider
-  const handleSimulateSlider = async (valueFloor: number) => {
+  // 4. What-If Multi-Slider Simulation
+  const handleSimulateSliders = async (params: {
+    cost_of_contact_threshold_rupees: number;
+    max_recovery_attempts: number;
+    confidence_floor: number;
+  }) => {
     try {
-      const sim = await simulateWhatIfPolicy({
-        cost_of_contact_threshold_rupees: valueFloor,
-      });
+      const sim = await simulateWhatIfPolicy(params);
       setSimulationData(sim);
     } catch (e) {
       console.error('Simulation error:', e);
     }
   };
 
+  // 5. Download Audit CSV
+  const handleDownloadAuditCSV = () => {
+    const runIdToExport = currentRunId || 'latest_run';
+    const downloadUrl = `/api/runs/${runIdToExport}/export/csv`;
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.setAttribute('download', `recovery_agent_audit_trail_${runIdToExport}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
-    <div className="min-h-screen bg-page text-ink flex flex-col font-sans selection:bg-accent-subtle selection:text-accent">
+    <div className={`min-h-screen bg-page text-ink flex flex-col font-sans selection:bg-accent-subtle selection:text-accent ${isDark ? 'dark bg-[#0D0F12] text-[#F0F2F5]' : ''}`}>
       {/* Top Bar Instrument Header */}
       <header className="h-14 border-b border-border bg-surface px-6 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
@@ -233,28 +264,55 @@ export default function App() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-sm font-semibold text-ink">Razorpay AI Revenue Recovery Agent</h1>
+              <h1 className="text-sm font-bold text-ink">Razorpay AI Revenue Recovery Agent</h1>
               <Badge variant="accent" size="sm">Track 3</Badge>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 text-xs font-mono">
-          <div className="flex items-center gap-1.5 text-ink-muted bg-surface-inset px-2.5 py-1 rounded border border-border-subtle">
+        <div className="flex items-center gap-3 text-xs">
+          {/* Audit CSV Download Button */}
+          <Button
+            variant="quiet"
+            size="sm"
+            icon={<Download className="w-3.5 h-3.5 text-accent" />}
+            onClick={handleDownloadAuditCSV}
+            title="Download complete immutable audit trail as CSV"
+          >
+            Export Audit (CSV)
+          </Button>
+
+          {/* Side-by-Side Comparison Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            icon={<Layers className="w-3.5 h-3.5 text-accent" />}
+            onClick={() => setIsComparisonOpen(true)}
+          >
+            Compare Uplift
+          </Button>
+
+          <div className="h-4 w-[1px] bg-border mx-1" />
+
+          {/* Test Mode & Clock Indicators */}
+          <div className="flex items-center gap-1.5 text-ink-muted bg-surface-inset px-2.5 py-1 rounded border border-border-subtle font-mono text-xxs">
             <span className="w-2 h-2 rounded-full bg-recovered animate-pulse" />
             <span>RZP TEST MODE</span>
           </div>
-          <div className="text-ink-muted">
+
+          <div className="text-ink-muted font-mono text-xxs">
             seed: <span className="text-ink font-semibold">{seed}</span>
           </div>
-          <div className="text-ink-muted">
-            clock: <span className="text-ink font-semibold">{timeMultiplier.toLocaleString()}x</span>
-          </div>
-          {currentRunId && (
-            <div className="text-ink-subtle truncate max-w-[140px]" title={currentRunId}>
-              {currentRunId}
-            </div>
-          )}
+
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={() => setIsDark(!isDark)}
+            className="p-1.5 rounded text-ink-muted hover:text-ink hover:bg-surface-inset transition-colors"
+            aria-label="Toggle Dark Mode"
+            title="Toggle theme"
+          >
+            {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+          </button>
         </div>
       </header>
 
@@ -269,10 +327,12 @@ export default function App() {
           setSeed={setSeed}
           timeMultiplier={timeMultiplier}
           setTimeMultiplier={setTimeMultiplier}
+          injectFailure={injectFailure}
+          setInjectFailure={setInjectFailure}
           onRunBatch={handleStartRun}
           onResetDataset={handleResetDataset}
           isRunning={isRunning}
-          onSimulateSlider={handleSimulateSlider}
+          onSimulateSliders={handleSimulateSliders}
         />
 
         {/* CENTRE COLUMN: Live Decision Feed & Bottom Exceptions Table */}
@@ -305,6 +365,13 @@ export default function App() {
       <AuditDrawer
         paymentId={selectedPaymentId}
         onClose={() => setSelectedPaymentId(null)}
+      />
+
+      {/* Side-by-Side Uplift Comparison Modal */}
+      <ComparisonModal
+        isOpen={isComparisonOpen}
+        onClose={() => setIsComparisonOpen(false)}
+        report={comparisonReport}
       />
     </div>
   );

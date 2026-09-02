@@ -11,13 +11,15 @@ Provides:
 """
 
 import asyncio
+import csv
 from datetime import datetime, timezone
+import io
 import json
 import logging
 from typing import Any, Dict, List, Optional
 import uuid
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Path, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Path, Query, Response, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -58,6 +60,8 @@ class StartRunRequest(BaseModel):
     split: Optional[str] = Field("all", description="Dataset split filter ('train', 'held_out', or 'all')")
     reseed: bool = Field(True, description="Whether to re-generate synthetic dataset prior to run")
     time_multiplier: Optional[float] = Field(None, description="Optional override for demo clock time acceleration (e.g. 28800x)")
+    inject_llm_failure: bool = Field(False, description="Simulate an LLM provider JSON malformation/timeout to demonstrate graceful rule-based fallback")
+    corrupt_payment_id: Optional[str] = Field(None, description="Target payment ID to force failure on")
 
 
 class StartRunResponse(BaseModel):
@@ -127,6 +131,8 @@ def _background_run_worker(
     split: Optional[str],
     reseed: bool,
     time_multiplier: Optional[float],
+    inject_llm_failure: bool = False,
+    corrupt_payment_id: Optional[str] = None,
 ):
     try:
         if reseed:
@@ -141,6 +147,8 @@ def _background_run_worker(
             run_id=run_id,
             time_multiplier=time_multiplier,
             sleep_between_steps=True,
+            inject_llm_failure=inject_llm_failure,
+            corrupt_payment_id=corrupt_payment_id,
         )
         _RUN_SUMMARIES[run_id] = summary
 
@@ -181,6 +189,8 @@ def start_recovery_run(
         split=req.split,
         reseed=req.reseed,
         time_multiplier=req.time_multiplier,
+        inject_llm_failure=req.inject_llm_failure,
+        corrupt_payment_id=req.corrupt_payment_id,
     )
 
     return StartRunResponse(
@@ -240,6 +250,89 @@ def get_run_details(
         }
 
     raise HTTPException(status_code=404, detail=f"Run '{id}' not found.")
+
+
+@router.get("/{id}/export/csv")
+def export_run_audit_csv(
+    id: str = Path(..., description="The unique run_id"),
+    db: Session = Depends(get_db),
+):
+    """
+    Exports the complete, immutable audit trail for all transactions in the run as a downloadable CSV.
+    """
+    payments = db.query(FailedPayment).order_by(FailedPayment.failed_at.asc()).all()
+    if not payments:
+        raise HTTPException(status_code=404, detail="No transactions found to export.")
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Header Row
+    writer.writerow([
+        "Payment ID",
+        "Razorpay Order ID",
+        "Customer Name",
+        "Customer City",
+        "Amount (INR)",
+        "Currency",
+        "Payment Method",
+        "Failure Code",
+        "Failure Reason",
+        "Cart Summary",
+        "Intent Category",
+        "Classification Confidence",
+        "Policy Action Chosen",
+        "Gate Summary / Reason",
+        "Total Outreach Attempts",
+        "Payment Link ID",
+        "Payment Link URL",
+        "Attempt Outcome",
+        "Final Transaction Status",
+        "Failed At (UTC)",
+        "Audit Log Count",
+    ])
+
+    for p in payments:
+        cust = p.customer
+        attempts = p.recovery_attempts
+        last_att = attempts[-1] if attempts else None
+        last_audit = db.query(AuditLog).filter_by(failed_payment_id=p.id).order_by(AuditLog.created_at.desc()).first()
+        class_audit = db.query(AuditLog).filter_by(failed_payment_id=p.id, stage="CLASSIFICATION").first()
+
+        writer.writerow([
+            p.id,
+            p.razorpay_order_id,
+            cust.name if cust else "Unknown",
+            cust.city if cust else "Unknown",
+            f"{p.amount_rupees:.2f}",
+            p.currency,
+            p.method.value if hasattr(p.method, "value") else str(p.method),
+            p.failure_code,
+            p.failure_reason,
+            p.cart_summary,
+            class_audit.decision if class_audit else (last_audit.decision if last_audit else ""),
+            f"{class_audit.confidence:.2f}" if class_audit and class_audit.confidence else "N/A",
+            last_att.action_taken if last_att else (last_audit.decision if last_audit else "none"),
+            last_audit.reason if last_audit else "",
+            len(attempts),
+            last_att.payment_link_id if last_att else "",
+            last_att.payment_link_url if last_att else "",
+            last_att.outcome.value if last_att and hasattr(last_att.outcome, "value") else (str(last_att.outcome) if last_att else "none"),
+            p.status.value if hasattr(p.status, "value") else str(p.status),
+            p.failed_at.isoformat() if p.failed_at else "",
+            len(p.audit_logs),
+        ])
+
+    csv_content = output.getvalue()
+    filename = f"recovery_agent_audit_trail_{id}.csv"
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "no-cache",
+        }
+    )
 
 
 @router.get("/{id}/stream")

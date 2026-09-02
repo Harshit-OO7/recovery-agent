@@ -12,10 +12,16 @@ export interface PolicyConfigPanelProps {
   setSeed: (seed: number) => void;
   timeMultiplier: number;
   setTimeMultiplier: (multiplier: number) => void;
+  injectFailure: boolean;
+  setInjectFailure: (inject: boolean) => void;
   onRunBatch: () => void;
   onResetDataset: () => void;
   isRunning: boolean;
-  onSimulateSlider: (valueFloor: number) => void;
+  onSimulateSliders: (params: {
+    cost_of_contact_threshold_rupees: number;
+    max_recovery_attempts: number;
+    confidence_floor: number;
+  }) => void;
 }
 
 export const PolicyConfigPanel: React.FC<PolicyConfigPanelProps> = ({
@@ -26,21 +32,29 @@ export const PolicyConfigPanel: React.FC<PolicyConfigPanelProps> = ({
   setSeed,
   timeMultiplier,
   setTimeMultiplier,
+  injectFailure,
+  setInjectFailure,
   onRunBatch,
   onResetDataset,
   isRunning,
-  onSimulateSlider,
+  onSimulateSliders,
 }) => {
-  const [sliderVal, setSliderVal] = useState<number>(100);
+  const [valueFloor, setValueFloor] = useState<number>(100);
+  const [maxAttempts, setMaxAttempts] = useState<number>(2);
+  const [confidenceFloor, setConfidenceFloor] = useState<number>(0.55);
 
-  // Time compression calculation helper
-  // Real cooldown: 24h (86,400s). At 28,800x -> 3.0s.
   const cooldownRealHours = policyConfig?.POLICY_CONFIG.COOLDOWN_HOURS || 24;
   const cooldownCompressedSecs = (cooldownRealHours * 3600 / timeMultiplier).toFixed(1);
 
-  const handleSliderChange = (newVal: number) => {
-    setSliderVal(newVal);
-    onSimulateSlider(newVal);
+  const handleParamChange = (newFloor: number, newAttempts: number, newConf: number) => {
+    setValueFloor(newFloor);
+    setMaxAttempts(newAttempts);
+    setConfidenceFloor(newConf);
+    onSimulateSliders({
+      cost_of_contact_threshold_rupees: newFloor,
+      max_recovery_attempts: newAttempts,
+      confidence_floor: newConf,
+    });
   };
 
   return (
@@ -81,7 +95,7 @@ export const PolicyConfigPanel: React.FC<PolicyConfigPanelProps> = ({
         </div>
       </div>
 
-      {/* 2. Run Parameters (Seed & Demo Clock Speed) */}
+      {/* 2. Run Parameters & Failure Injection */}
       <div className="space-y-3 pt-2 border-t border-border">
         <div className="text-xxs text-ink-muted font-mono uppercase tracking-wider">
           Batch Controls
@@ -126,6 +140,25 @@ export const PolicyConfigPanel: React.FC<PolicyConfigPanelProps> = ({
           </div>
         </div>
 
+        {/* Controlled Failure Injection Toggle */}
+        <div className="p-2.5 rounded bg-surface-inset border border-border-subtle space-y-1.5">
+          <label className="flex items-start gap-2 cursor-pointer text-xs">
+            <input
+              type="checkbox"
+              checked={injectFailure}
+              disabled={isRunning || mode === 'baseline'}
+              onChange={(e) => setInjectFailure(e.target.checked)}
+              className="mt-0.5 accent-accent rounded"
+            />
+            <div className="flex-1">
+              <span className="font-semibold text-ink block text-xxs">Inject LLM Malformed JSON</span>
+              <span className="text-xxs text-ink-muted font-sans block leading-tight">
+                Simulates LLM parse failure on Payment #2 to demonstrate rule-based fallback recovery with 0 crashes.
+              </span>
+            </div>
+          </label>
+        </div>
+
         {/* Trigger Buttons */}
         <div className="space-y-2 pt-1">
           <Button
@@ -152,108 +185,111 @@ export const PolicyConfigPanel: React.FC<PolicyConfigPanelProps> = ({
         </div>
       </div>
 
-      {/* 3. Live Deterministic Policy Config Panel */}
-      <div className="pt-2 border-t border-border space-y-2.5">
+      {/* 3. Live Policy Config Card */}
+      <div className="pt-2 border-t border-border space-y-2">
         <div className="flex items-center justify-between">
           <div className="text-xxs text-ink-muted font-mono uppercase tracking-wider flex items-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-accent" />
-            <span>Deterministic Policy Gates</span>
+            <span>Deterministic Hard Gates</span>
           </div>
           <Badge variant="accent" size="sm">7 Gates</Badge>
         </div>
 
         <div className="space-y-1.5 text-xs">
-          {/* G1 */}
-          <div className="p-2.5 rounded bg-surface-raised border border-border flex justify-between items-center">
-            <div>
-              <div className="font-mono text-xs font-semibold text-ink">G1 do_not_contact</div>
-              <div className="text-xxs text-ink-muted font-sans">Risk flagged / opted out</div>
-            </div>
-            <Badge variant="suppressed" size="sm">Permanent</Badge>
+          <div className="p-2 rounded bg-surface-raised border border-border flex justify-between items-center">
+            <span className="font-mono text-xs text-ink">G1 do_not_contact</span>
+            <Badge variant="suppressed" size="sm">Permanent Stop</Badge>
           </div>
-
-          {/* G2 */}
-          <div className="p-2.5 rounded bg-surface-raised border border-border flex justify-between items-center">
-            <div>
-              <div className="font-mono text-xs font-semibold text-ink">G2 value_floor</div>
-              <div className="text-xxs text-ink-muted font-sans">Outreach cost floor</div>
-            </div>
-            <span className="font-mono text-xs font-bold text-ink">
-              Rs. {((policyConfig?.POLICY_CONFIG.COST_OF_CONTACT_THRESHOLD_PAISE || 10000) / 100).toFixed(2)}
-            </span>
-          </div>
-
-          {/* G3 */}
-          <div className="p-2.5 rounded bg-surface-raised border border-border flex justify-between items-center">
-            <div>
-              <div className="font-mono text-xs font-semibold text-ink">G3 max_attempts</div>
-              <div className="text-xxs text-ink-muted font-sans">Fatigue stopping rule</div>
-            </div>
-            <span className="font-mono text-xs font-bold text-ink">
-              {policyConfig?.POLICY_CONFIG.MAX_RECOVERY_ATTEMPTS || 2} attempts max
-            </span>
-          </div>
-
-          {/* G4 */}
-          <div className="p-2.5 rounded bg-surface-raised border border-border flex justify-between items-center">
-            <div>
-              <div className="font-mono text-xs font-semibold text-ink">G4 cooldown</div>
-              <div className="text-xxs text-ink-muted font-sans">
-                Real: <span className="font-mono font-medium">{cooldownRealHours}h</span> ? Demo: <span className="font-mono font-medium">{cooldownCompressedSecs}s</span>
-              </div>
-            </div>
+          <div className="p-2 rounded bg-surface-raised border border-border flex justify-between items-center">
+            <span className="font-mono text-xs text-ink">G4 cooldown</span>
             <span className="font-mono text-xs font-bold text-ink">24.0h</span>
           </div>
-
-          {/* G5 */}
-          <div className="p-2.5 rounded bg-surface-raised border border-border flex justify-between items-center">
-            <div>
-              <div className="font-mono text-xs font-semibold text-ink">G5 quiet_hours</div>
-              <div className="text-xxs text-ink-muted font-sans">09:00 - 20:00 IST</div>
-            </div>
-            <Badge variant="neutral" size="sm">Daytime Only</Badge>
-          </div>
-
-          {/* G6 */}
-          <div className="p-2.5 rounded bg-surface-raised border border-border flex justify-between items-center">
-            <div>
-              <div className="font-mono text-xs font-semibold text-ink">G6 confidence_floor</div>
-              <div className="text-xxs text-ink-muted font-sans">Escalate ambiguous cases</div>
-            </div>
-            <span className="font-mono text-xs font-bold text-ink">
-              {((policyConfig?.POLICY_CONFIG.CONFIDENCE_FLOOR || 0.55) * 100).toFixed(0)}% min
-            </span>
+          <div className="p-2 rounded bg-surface-raised border border-border flex justify-between items-center">
+            <span className="font-mono text-xs text-ink">G5 quiet_hours</span>
+            <span className="font-mono text-xxs font-medium text-ink">09:00 - 20:00 IST</span>
           </div>
         </div>
       </div>
 
-      {/* 4. Interactive What-If Parameter Slider */}
-      <div className="pt-2 border-t border-border">
-        <div className="flex items-center justify-between mb-2">
+      {/* 4. Interactive What-If Policy Parameter Sliders */}
+      <div className="pt-2 border-t border-border space-y-3.5">
+        <div className="flex items-center justify-between">
           <div className="text-xxs text-ink-muted font-mono uppercase tracking-wider flex items-center gap-1.5">
             <Sliders className="w-3.5 h-3.5 text-ink-muted" />
-            <span>What-If Value Floor</span>
+            <span>What-If Policy Sliders</span>
           </div>
-          <span className="font-mono text-xs font-bold text-accent">
-            Rs. {sliderVal}.00
-          </span>
+          <span className="text-xxs font-mono text-accent font-semibold">Instant Sim</span>
         </div>
-        <input
-          type="range"
-          min="0"
-          max="500"
-          step="25"
-          value={sliderVal}
-          onChange={(e) => handleSliderChange(Number(e.target.value))}
-          className="w-full accent-accent cursor-pointer"
-        />
-        <div className="flex justify-between text-xxs font-mono text-ink-subtle mt-1">
-          <span>Rs. 0</span>
-          <span>Rs. 250</span>
-          <span>Rs. 500</span>
+
+        {/* Slider 1: Value Floor */}
+        <div className="space-y-1">
+          <div className="flex justify-between text-xs">
+            <span className="text-ink-muted font-mono text-xxs">G2 Value Floor:</span>
+            <span className="font-mono font-bold text-xs text-accent">Rs. {valueFloor}.00</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="500"
+            step="25"
+            value={valueFloor}
+            onChange={(e) => handleParamChange(Number(e.target.value), maxAttempts, confidenceFloor)}
+            className="w-full accent-accent cursor-pointer h-1.5"
+          />
+          <div className="flex justify-between text-xxs font-mono text-ink-subtle">
+            <span>Rs. 0</span>
+            <span>Rs. 250</span>
+            <span>Rs. 500</span>
+          </div>
         </div>
-        <div className="text-xxs text-ink-subtle mt-1.5 font-sans">
-          Re-runs policy without re-calling LLM APIs.
+
+        {/* Slider 2: Max Attempts */}
+        <div className="space-y-1">
+          <div className="flex justify-between text-xs">
+            <span className="text-ink-muted font-mono text-xxs">G3 Max Attempts:</span>
+            <span className="font-mono font-bold text-xs text-accent">{maxAttempts} attempts</span>
+          </div>
+          <input
+            type="range"
+            min="1"
+            max="4"
+            step="1"
+            value={maxAttempts}
+            onChange={(e) => handleParamChange(valueFloor, Number(e.target.value), confidenceFloor)}
+            className="w-full accent-accent cursor-pointer h-1.5"
+          />
+          <div className="flex justify-between text-xxs font-mono text-ink-subtle">
+            <span>1 attempt</span>
+            <span>2</span>
+            <span>3</span>
+            <span>4</span>
+          </div>
+        </div>
+
+        {/* Slider 3: Confidence Floor */}
+        <div className="space-y-1">
+          <div className="flex justify-between text-xs">
+            <span className="text-ink-muted font-mono text-xxs">G6 Confidence Floor:</span>
+            <span className="font-mono font-bold text-xs text-accent">{(confidenceFloor * 100).toFixed(0)}%</span>
+          </div>
+          <input
+            type="range"
+            min="0.30"
+            max="0.95"
+            step="0.05"
+            value={confidenceFloor}
+            onChange={(e) => handleParamChange(valueFloor, maxAttempts, Number(e.target.value))}
+            className="w-full accent-accent cursor-pointer h-1.5"
+          />
+          <div className="flex justify-between text-xxs font-mono text-ink-subtle">
+            <span>30%</span>
+            <span>55%</span>
+            <span>95%</span>
+          </div>
+        </div>
+
+        <div className="text-xxs text-ink-subtle font-sans leading-tight">
+          Adjusting sliders re-evaluates policy restraint against cached classifications without calling LLM endpoints.
         </div>
       </div>
     </aside>

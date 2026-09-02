@@ -92,6 +92,8 @@ def run_batch(
     time_multiplier: Optional[float] = None,
     sleep_between_steps: bool = True,
     razorpay_client: Optional[BaseRazorpayClient] = None,
+    inject_llm_failure: bool = False,
+    corrupt_payment_id: Optional[str] = None,
 ) -> RunSummary:
     """
     Executes a complete recovery batch in 'agent' or 'baseline' mode.
@@ -211,7 +213,17 @@ def run_batch(
                     continue
 
                 # 1. CLASSIFY ROOT CAUSE & INTENT (LLM Layer)
-                classification = classify_payment_failure(payment=payment, customer=cust)
+                should_corrupt = (
+                    inject_llm_failure and (
+                        (corrupt_payment_id and payment.id == corrupt_payment_id) or
+                        (not corrupt_payment_id and idx == 1)
+                    )
+                )
+                classification = classify_payment_failure(
+                    payment=payment,
+                    customer=cust,
+                    force_llm_failure=should_corrupt,
+                )
                 cat_key = classification.category.value
                 category_counts[cat_key] = category_counts.get(cat_key, 0) + 1
 

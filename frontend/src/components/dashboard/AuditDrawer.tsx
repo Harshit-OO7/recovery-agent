@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   X, 
-  ExternalLink, 
   ShieldAlert, 
   CheckCircle2, 
   MessageSquare, 
@@ -15,6 +14,7 @@ import { Button } from '@/components/primitives/Button';
 import { formatRupees } from '@/utils/formatters';
 import { PaymentAuditTrail } from '@/api/types';
 import { fetchPaymentAuditTrail } from '@/api/client';
+import { PhoneMessagePreview } from './PhoneMessagePreview';
 
 export interface AuditDrawerProps {
   paymentId: string | null;
@@ -232,39 +232,45 @@ export const AuditDrawer: React.FC<AuditDrawerProps> = ({ paymentId, onClose }) 
                   </div>
                 </div>
 
-                {/* 6. Outreach Copy & Generated Razorpay Payment Link */}
-                {lastAttempt && (
-                  <div>
-                    <div className="text-xxs text-ink-muted uppercase tracking-wider font-mono mb-2 flex items-center gap-1.5">
-                      <MessageSquare className="w-3.5 h-3.5 text-accent" />
-                      <span>Outreach Dispatch & Razorpay Link</span>
-                    </div>
-                    <div className="bg-surface rounded border border-border p-3.5 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono text-xs font-semibold">Attempt #{lastAttempt.attempt_number} ({lastAttempt.channel.toUpperCase()})</span>
-                        <Badge variant={lastAttempt.outcome === 'paid' ? 'recovered' : 'neutral'}>
-                          {lastAttempt.outcome}
-                        </Badge>
-                      </div>
-
-                      {/* Live Generated Link */}
-                      {lastAttempt.payment_link_url && (
-                        <div>
-                          <div className="text-xxs text-ink-muted font-mono mb-1">Razorpay Test Mode 1-Click Link:</div>
-                          <a
-                            href={lastAttempt.payment_link_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-between gap-2 font-mono text-xs text-accent hover:underline bg-accent-subtle px-3 py-2 rounded border border-accent-border w-full group"
-                          >
-                            <span className="truncate">{lastAttempt.payment_link_url}</span>
-                            <ExternalLink className="w-3.5 h-3.5 shrink-0 group-hover:translate-x-0.5 transition-transform" />
-                          </a>
+                {/* 6. Outreach Copy & Tangible Message Preview */}
+                <div>
+                  <div className="text-xxs text-ink-muted uppercase tracking-wider font-mono mb-2 flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5 text-accent" />
+                    <span>Outreach Dispatch & Phone Message Preview</span>
+                  </div>
+                  
+                  {lastAttempt || data.status !== 'suppressed' ? (
+                    <div className="bg-surface rounded border border-border p-4 space-y-4">
+                      {lastAttempt && (
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono text-xs font-semibold">
+                            Attempt #{lastAttempt.attempt_number} ({lastAttempt.channel.toUpperCase()})
+                          </span>
+                          <Badge variant={lastAttempt.outcome === 'paid' ? 'recovered' : 'neutral'}>
+                            {lastAttempt.outcome}
+                          </Badge>
                         </div>
                       )}
+
+                      {/* Tangible Smartphone Message Preview Frame */}
+                      <div className="flex justify-center py-1">
+                        <PhoneMessagePreview
+                          customerName={data.customer.name}
+                          amountRupees={data.amount_rupees}
+                          cartSummary={data.cart_summary}
+                          paymentLinkUrl={lastAttempt?.payment_link_url || `https://rzp.io/i/test_pay_${data.payment_id}`}
+                          failureReason={data.failure_reason}
+                          category={classAudit ? classAudit.decision : (execAudit ? execAudit.decision : undefined)}
+                          attemptNumber={lastAttempt?.attempt_number || 1}
+                        />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="p-3.5 rounded bg-surface-inset border border-border-subtle text-xxs text-ink-muted">
+                      No outreach dispatched. Payment was suppressed by policy gate to protect customer experience.
+                    </div>
+                  )}
+                </div>
 
                 {/* 7. Chronological Audit Log Timeline */}
                 <div>

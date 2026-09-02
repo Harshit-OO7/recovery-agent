@@ -24,6 +24,7 @@ export interface StartRunPayload {
   split?: string;
   reseed?: boolean;
   time_multiplier?: number;
+  inject_llm_failure?: boolean;
 }
 
 export interface StartRunResponse {

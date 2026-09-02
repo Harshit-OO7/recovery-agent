@@ -161,12 +161,13 @@ def classify_payment_failure(
     customer: Union[Customer, CustomerAgentView, Dict[str, Any]],
     provider: Optional[LLMProvider] = None,
     use_cache: bool = True,
+    force_llm_failure: bool = False,
 ) -> ClassificationResult:
     """
     Classifies a payment failure using the configured LLM provider with caching,
     strict schema validation, and automatic rule-based fallback.
     """
-    if use_cache and payment.id in _CLASSIFICATION_CACHE:
+    if not force_llm_failure and use_cache and payment.id in _CLASSIFICATION_CACHE:
         return _CLASSIFICATION_CACHE[payment.id]
 
     # Extract non-sensitive customer context (NEVER propensity ground truth)
@@ -182,6 +183,15 @@ def classify_payment_failure(
         }
     else:
         cust_data = {}
+
+    # Controlled Failure Injection for Live Demonstration
+    if force_llm_failure:
+        logger.warning(f"[FAILURE INJECTION ACTIVE] Simulating malformed LLM response for payment {payment.id}. Engaging deterministic fallback classifier.")
+        result = deterministic_fallback_classifier(payment, cust_data)
+        result.reasoning = f"[FALLBACK ENGAGED - LLM ERROR HANDLED] {result.reasoning}"
+        if use_cache:
+            _CLASSIFICATION_CACHE[payment.id] = result
+        return result
 
     # Fast-path for risk-flagged accounts
     if cust_data.get("is_risk_flagged", False):
