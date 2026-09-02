@@ -180,7 +180,7 @@ class MockRazorpayClient(BaseRazorpayClient):
 
         clean_ref = reference_id.replace(":", "_").replace("-", "_")
         link_id = f"plink_mock_{clean_ref[:18]}"
-        short_url = f"https://rzp.io/i/mock_{clean_ref[:12]}"
+        short_url = f"http://localhost:8000/pay/{link_id}"
 
         result = {
             "id": link_id,
