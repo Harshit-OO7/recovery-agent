@@ -63,41 +63,64 @@
   background: #8C93A0;
 }
 
-/* Global Dark Mode Overrides */
-html.dark .bg-page {
-  background-color: #0D0F12 !important;
+/* Global Semantic Dark Mode Colors */
+html.dark {
+  color: #F0F2F5;
+  background-color: #0D0F12;
 }
 
-html.dark .bg-surface {
-  background-color: #161920 !important;
+html.dark *, html.dark *::before, html.dark *::after {
+  border-color: #282D37;
 }
 
-html.dark .bg-surface-raised {
-  background-color: #1B1F27 !important;
-}
+/* Backgrounds */
+html.dark .bg-page { background-color: #0D0F12 !important; }
+html.dark .bg-surface { background-color: #161920 !important; }
+html.dark .bg-surface-raised { background-color: #1C202A !important; }
+html.dark .bg-surface-inset { background-color: #101217 !important; }
 
-html.dark .bg-surface-inset {
-  background-color: #111318 !important;
-}
+/* Inks & Text */
+html.dark .text-ink { color: #F0F2F5 !important; }
+html.dark .text-ink-muted { color: #9CA3AF !important; }
+html.dark .text-ink-subtle { color: #6B7280 !important; }
 
-html.dark .text-ink {
+/* Borders */
+html.dark .border-border { border-color: #282D37 !important; }
+html.dark .border-border-subtle { border-color: #1F242D !important; }
+html.dark .border-border-strong { border-color: #374151 !important; }
+
+/* Accent (Indigo/Violet) */
+html.dark .text-accent { color: #818CF8 !important; }
+html.dark .bg-accent-subtle { background-color: #1E2248 !important; }
+html.dark .border-accent-border { border-color: #374191 !important; }
+
+/* Recovered (Emerald) */
+html.dark .text-recovered { color: #34D399 !important; }
+html.dark .bg-recovered-subtle { background-color: #0E2A20 !important; }
+html.dark .border-recovered-border { border-color: #134E48 !important; }
+
+/* Suppressed / Waiting (Amber) */
+html.dark .text-suppressed { color: #FBBF24 !important; }
+html.dark .bg-suppressed-subtle { background-color: #2E2108 !important; }
+html.dark .border-suppressed-border { border-color: #5C400D !important; }
+
+/* Danger (Red) */
+html.dark .text-danger { color: #F87171 !important; }
+html.dark .bg-danger-subtle { background-color: #381212 !important; }
+html.dark .border-danger-border { border-color: #6B1D1D !important; }
+
+/* DNC / Neutral (Slate) */
+html.dark .text-dnc { color: #9CA3AF !important; }
+html.dark .bg-dnc-subtle { background-color: #1E222A !important; }
+html.dark .border-dnc-border { border-color: #2D333F !important; }
+
+/* Form Controls */
+html.dark input[type="number"],
+html.dark input[type="text"],
+html.dark select {
+  background-color: #101217 !important;
   color: #F0F2F5 !important;
-}
-
-html.dark .text-ink-muted {
-  color: #9CA3AF !important;
-}
-
-html.dark .text-ink-subtle {
-  color: #6B7280 !important;
-}
-
-html.dark .border-border {
   border-color: #282D37 !important;
-}
-
-html.dark .border-border-subtle {
-  border-color: #1F242D !important;
 }
 
 html.dark ::-webkit-scrollbar-thumb {
