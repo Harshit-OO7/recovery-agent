@@ -19,15 +19,16 @@ class StreamEvent(BaseModel):
     data: Dict[str, Any] = Field(default_factory=dict)
 
     def to_sse(self) -> str:
-        """Formats the event as an SSE message block."""
-        payload = json.dumps({
+        """Formats the event as an SSE message block compatible with standard browser EventSource.onmessage."""
+        merged_payload = {
             "event_type": self.event_type,
             "run_id": self.run_id,
             "timestamp": self.timestamp,
+            **self.data,
             "data": self.data,
-        })
-        sse_str = f"event: {self.event_type}\ndata: {payload}\n\n"
-        return sse_str
+        }
+        payload = json.dumps(merged_payload)
+        return f"data: {payload}\n\n"
 
 
 class RunEventManager:

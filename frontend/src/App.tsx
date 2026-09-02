@@ -13,6 +13,7 @@ import {
   startRecoveryRun, 
   fetchComparisonReport, 
   fetchRunExceptions,
+  fetchRunEvents,
   simulateWhatIfPolicy 
 } from '@/api/client';
 import { 
@@ -65,6 +66,27 @@ export default function App() {
     fetchComparisonReport(seed)
       .then((report) => setComparisonReport(report))
       .catch((err) => console.error('Error loading initial comparison:', err));
+
+    // Pre-populate events if database already has transactions
+    fetchRunEvents('initial', 80)
+      .then((evRes) => {
+        if (evRes?.items && evRes.items.length > 0) {
+          setEvents(evRes.items.map((item: any) => ({
+            payment_id: item.payment_id,
+            order_id: item.order_id,
+            amount_rupees: item.amount_rupees,
+            customer_name: item.customer_name,
+            customer_city: item.customer_city,
+            cart_summary: item.cart_summary,
+            status: item.status,
+            failure_code: item.failure_code,
+            failure_reason: item.failure_reason,
+            last_action: item.last_action,
+            state: item.status === 'open' ? 'classifying' : 'outcome',
+          })));
+        }
+      })
+      .catch((err) => console.error('Error loading initial events:', err));
   }, []);
 
   // Sync dark class on root
@@ -85,17 +107,13 @@ export default function App() {
     };
   }, []);
 
-  // 2. Start Recovery Run & Connect to SSE Stream
+  // 2. Start Live Recovery Run
   const handleStartRun = async () => {
     if (isRunning) return;
 
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-    }
-
     setIsRunning(true);
     setEvents([]);
-    setExceptions(null);
+    setSimulationData(null);
     setLiveStats({
       total: 0,
       recovered: 0,
@@ -123,9 +141,10 @@ export default function App() {
 
       es.onmessage = (event) => {
         try {
-          const data: SSEEventData = JSON.parse(event.data);
+          const raw = JSON.parse(event.data);
+          const data = raw.data ? { ...raw, ...raw.data } : raw;
 
-          if (data.event_type === 'step_processing') {
+          if (data.event_type === 'step_processing' || data.event_type === 'step_started') {
             setEvents((prev) => {
               const existingIdx = prev.findIndex((p) => p.payment_id === data.payment_id);
               if (existingIdx >= 0) {
@@ -169,8 +188,8 @@ export default function App() {
             // Update live totals
             setLiveStats((prev) => {
               const amt = data.amount_rupees || 0;
-              const isRec = data.status === 'recovered' || data.outcome === 'paid';
-              const isSupp = data.status === 'suppressed' || data.decision?.action === 'suppress';
+              const isRec = data.status === 'recovered' || data.outcome === 'paid' || data.status === 'RECOVERED';
+              const isSupp = data.status === 'suppressed' || data.decision?.action === 'suppress' || data.status === 'SUPPRESSED';
               return {
                 total: prev.total + 1,
                 recovered: prev.recovered + (isRec ? 1 : 0),
@@ -184,10 +203,27 @@ export default function App() {
             es.close();
             setIsRunning(false);
 
-            // Fetch final comparison and exceptions
+            // Fetch final comparison, exceptions, and events
             fetchComparisonReport(seed).then((rep) => setComparisonReport(rep));
             if (res.run_id) {
               fetchRunExceptions(res.run_id).then((exc) => setExceptions(exc));
+              fetchRunEvents(res.run_id, 80).then((evRes) => {
+                if (evRes?.items && evRes.items.length > 0) {
+                  setEvents(evRes.items.map((item: any) => ({
+                    payment_id: item.payment_id,
+                    order_id: item.order_id,
+                    amount_rupees: item.amount_rupees,
+                    customer_name: item.customer_name,
+                    customer_city: item.customer_city,
+                    cart_summary: item.cart_summary,
+                    status: item.status,
+                    failure_code: item.failure_code,
+                    failure_reason: item.failure_reason,
+                    last_action: item.last_action,
+                    state: 'outcome',
+                  })));
+                }
+              });
             }
           } else if (data.event_type === 'run_error') {
             es.close();
@@ -203,6 +239,25 @@ export default function App() {
         es.close();
         setIsRunning(false);
         fetchComparisonReport(seed).then((rep) => setComparisonReport(rep));
+        if (res.run_id) {
+          fetchRunEvents(res.run_id, 80).then((evRes) => {
+            if (evRes?.items && evRes.items.length > 0) {
+              setEvents(evRes.items.map((item: any) => ({
+                payment_id: item.payment_id,
+                order_id: item.order_id,
+                amount_rupees: item.amount_rupees,
+                customer_name: item.customer_name,
+                customer_city: item.customer_city,
+                cart_summary: item.cart_summary,
+                status: item.status,
+                failure_code: item.failure_code,
+                failure_reason: item.failure_reason,
+                last_action: item.last_action,
+                state: 'outcome',
+              })));
+            }
+          });
+        }
       };
 
     } catch (err: any) {

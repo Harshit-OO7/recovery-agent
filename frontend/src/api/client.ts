@@ -58,3 +58,9 @@ export async function simulateWhatIfPolicy(params: {
   if (!res.ok) throw new Error('Failed to simulate policy parameters');
   return res.json();
 }
+
+export async function fetchRunEvents(runId: string, pageSize: number = 80): Promise<any> {
+  const res = await fetch(`${API_BASE}/runs/${runId}/events?page=1&page_size=${pageSize}`);
+  if (!res.ok) throw new Error('Failed to fetch run events');
+  return res.json();
+}
