@@ -106,7 +106,7 @@ def _calculate_seconds_until_next_quiet_window_end(dt: datetime) -> int:
         )
 
     delta = (target_ist - ist_now).total_seconds()
-    return max(0, int(delta))
+    return max(60, int(delta))
 
 
 def decide(

@@ -190,6 +190,13 @@ def classify_payment_failure(
             _CLASSIFICATION_CACHE[payment.id] = result
         return result
 
+    from app.config import settings
+    if not settings.LLM_API_KEY or settings.LLM_API_KEY.startswith("your_") or settings.LLM_API_KEY.strip() == "":
+        result = deterministic_fallback_classifier(payment, cust_data)
+        if use_cache:
+            _CLASSIFICATION_CACHE[payment.id] = result
+        return result
+
     if provider is None:
         provider = get_llm_provider()
 

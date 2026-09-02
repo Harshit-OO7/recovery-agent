@@ -14,6 +14,7 @@ Every action writes a permanent AuditLog row (Core Principle #2).
 from datetime import datetime, timezone
 import logging
 from typing import Any, Dict, Optional, Union
+import uuid
 
 from sqlalchemy.orm import Session
 
@@ -140,7 +141,7 @@ def execute_decision(
         attempt_outcome = outcome_map.get(sim_res.outcome, AttemptOutcome.PENDING)
 
         # 5. Persist RecoveryAttempt
-        attempt_id = f"att_{payment.id}_{attempt_number}"
+        attempt_id = f"att_{payment.id}_{attempt_number}_{uuid.uuid4().hex[:6]}"
         attempt = RecoveryAttempt(
             id=attempt_id,
             failed_payment_id=payment.id,
@@ -164,7 +165,7 @@ def execute_decision(
             payment.status = PaymentStatus.IN_PROGRESS
 
         # 7. Write Audit Log
-        audit_id = f"aud_{payment.id}_{attempt_number}_exec"
+        audit_id = f"aud_{payment.id}_{attempt_number}_exec_{uuid.uuid4().hex[:6]}"
         audit = AuditLog(
             id=audit_id,
             failed_payment_id=payment.id,
@@ -217,7 +218,7 @@ def execute_decision(
             contact_time=now,
         )
 
-        attempt_id = f"att_{payment.id}_{attempt_number}"
+        attempt_id = f"att_{payment.id}_{attempt_number}_{uuid.uuid4().hex[:6]}"
         attempt = RecoveryAttempt(
             id=attempt_id,
             failed_payment_id=payment.id,
@@ -233,7 +234,7 @@ def execute_decision(
 
         payment.status = PaymentStatus.IN_PROGRESS
 
-        audit_id = f"aud_{payment.id}_{attempt_number}_reminder"
+        audit_id = f"aud_{payment.id}_{attempt_number}_reminder_{uuid.uuid4().hex[:6]}"
         audit = AuditLog(
             id=audit_id,
             failed_payment_id=payment.id,
@@ -265,7 +266,7 @@ def execute_decision(
     # --------------------------------------------------------------------------
     elif decision.action == PolicyAction.WAIT:
         payment.status = PaymentStatus.IN_PROGRESS
-        audit_id = f"aud_{payment.id}_{attempt_number}_wait"
+        audit_id = f"aud_{payment.id}_{attempt_number}_wait_{uuid.uuid4().hex[:6]}"
         audit = AuditLog(
             id=audit_id,
             failed_payment_id=payment.id,
@@ -293,7 +294,7 @@ def execute_decision(
     # --------------------------------------------------------------------------
     elif decision.action == PolicyAction.SUPPRESS:
         payment.status = PaymentStatus.SUPPRESSED
-        audit_id = f"aud_{payment.id}_{attempt_number}_suppress"
+        audit_id = f"aud_{payment.id}_{attempt_number}_suppress_{uuid.uuid4().hex[:6]}"
         audit = AuditLog(
             id=audit_id,
             failed_payment_id=payment.id,
@@ -321,7 +322,7 @@ def execute_decision(
     # --------------------------------------------------------------------------
     elif decision.action == PolicyAction.ESCALATE_TO_HUMAN:
         payment.status = PaymentStatus.IN_PROGRESS
-        audit_id = f"aud_{payment.id}_{attempt_number}_escalate"
+        audit_id = f"aud_{payment.id}_{attempt_number}_escalate_{uuid.uuid4().hex[:6]}"
         audit = AuditLog(
             id=audit_id,
             failed_payment_id=payment.id,
