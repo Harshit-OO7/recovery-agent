@@ -1,8 +1,21 @@
 """
-Deterministic Policy Engine module.
-Hard-coded gates that decide:
-- Whether to contact a customer
-- Frequency capping and cool-down intervals
-- Maximum contact limits
-- Explicit stopping rules (Restraint)
+Deterministic Policy Engine Package.
 """
+
+from app.policy.policy import (
+    POLICY_CONFIG,
+    PolicyAction,
+    GateStatus,
+    GateEvaluation,
+    Decision,
+    decide,
+)
+
+__all__ = [
+    "POLICY_CONFIG",
+    "PolicyAction",
+    "GateStatus",
+    "GateEvaluation",
+    "Decision",
+    "decide",
+]
