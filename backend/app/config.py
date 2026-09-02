@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     # Razorpay Test Credentials (NEVER live keys)
     RAZORPAY_KEY_ID: str = ""
     RAZORPAY_KEY_SECRET: str = ""
+    MOCK_RAZORPAY: bool = False
 
     # LLM Provider Configuration
     LLM_API_KEY: str = ""
