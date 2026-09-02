@@ -43,7 +43,7 @@ export const MetricsPanel: React.FC<MetricsPanelProps> = ({
   const suppVal = simulationData ? simulationData.simulated_suppressed_value_rupees : (comparisonReport?.suppressed_value_rupees || liveStats.suppressedRevenue || 125456);
 
   return (
-    <aside className="w-84 bg-surface p-5 flex flex-col gap-5 overflow-y-auto border-l border-border shrink-0 select-none">
+    <aside className="w-80 bg-surface p-5 flex flex-col gap-5 overflow-y-auto border-l border-border shrink-0 select-none">
       {/* 1. Recovery Performance & Lift vs Baseline Header */}
       <div>
         <div className="text-xxs text-ink-muted font-mono uppercase tracking-wider mb-2 flex items-center justify-between">

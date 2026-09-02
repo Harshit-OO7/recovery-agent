@@ -15,6 +15,15 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  html.dark {
+    color: #F0F2F5;
+    background-color: #0D0F12;
+  }
+
+  html.dark *, html.dark *::before, html.dark *::after {
+    border-color: #282D37;
+  }
+
   /* Monospace figures and tabular numbers */
   .font-mono, .tabular-nums {
     font-family: 'JetBrains Mono', 'Fira Code', 'Roboto Mono', Menlo, monospace;
@@ -52,4 +61,49 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #8C93A0;
+}
+
+/* Global Dark Mode Overrides */
+html.dark .bg-page {
+  background-color: #0D0F12 !important;
+}
+
+html.dark .bg-surface {
+  background-color: #161920 !important;
+}
+
+html.dark .bg-surface-raised {
+  background-color: #1B1F27 !important;
+}
+
+html.dark .bg-surface-inset {
+  background-color: #111318 !important;
+}
+
+html.dark .text-ink {
+  color: #F0F2F5 !important;
+}
+
+html.dark .text-ink-muted {
+  color: #9CA3AF !important;
+}
+
+html.dark .text-ink-subtle {
+  color: #6B7280 !important;
+}
+
+html.dark .border-border {
+  border-color: #282D37 !important;
+}
+
+html.dark .border-border-subtle {
+  border-color: #1F242D !important;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #374151;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4B5563;
 }

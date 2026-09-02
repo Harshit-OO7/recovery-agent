@@ -317,7 +317,7 @@ export default function App() {
       </header>
 
       {/* Main 3-Column Instrument Grid */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-x-auto overflow-y-hidden min-w-full">
         {/* LEFT RAIL: Policy Config & Run Controls */}
         <PolicyConfigPanel
           policyConfig={policyConfig}
@@ -336,7 +336,7 @@ export default function App() {
         />
 
         {/* CENTRE COLUMN: Live Decision Feed & Bottom Exceptions Table */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <div className="flex-1 flex flex-col min-w-[480px] overflow-hidden">
           <DecisionFeed
             events={events}
             selectedPaymentId={selectedPaymentId}

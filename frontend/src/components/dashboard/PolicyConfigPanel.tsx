@@ -58,7 +58,7 @@ export const PolicyConfigPanel: React.FC<PolicyConfigPanelProps> = ({
   };
 
   return (
-    <aside className="w-80 border-r border-border bg-surface p-5 flex flex-col gap-5 overflow-y-auto shrink-0 select-none">
+    <aside className="w-72 border-r border-border bg-surface p-4 flex flex-col gap-4 overflow-y-auto shrink-0 select-none">
       {/* 1. Execution Mode Toggle */}
       <div>
         <div className="text-xxs text-ink-muted font-mono uppercase tracking-wider mb-2">
